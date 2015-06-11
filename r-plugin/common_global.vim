@@ -565,8 +565,7 @@ endfunction
 function GoDown()
     if &filetype == "rnoweb"
         let curline = getline(".")
-        let fc = curline[0]
-        if fc == '@'
+        if curline[0] == '@'
             call RnwNextChunk()
             return
         endif
@@ -587,13 +586,13 @@ function GoDown()
     let i = line(".") + 1
     call cursor(i, 1)
     let curline = substitute(getline("."), '^\s*', "", "")
-    let fc = curline[0]
+    let curline = substitute(curline, "^#'", "", "")
     let lastLine = line("$")
-    while i < lastLine && (fc == '#' || strlen(curline) == 0)
+    while i < lastLine && (curline[0] == '#' || strlen(curline) == 0)
         let i = i + 1
         call cursor(i, 1)
         let curline = substitute(getline("."), '^\s*', "", "")
-        let fc = curline[0]
+        let curline = substitute(curline, "^#'", "", "")
     endwhile
 endfunction
 
@@ -1733,6 +1732,8 @@ function SendSelectionToR(...)
         let lines[llen] = strpart(lines[llen], 0, j)
     endif
 
+    let lines = map(copy(lines), 'substitute(v:val, "^#' . "'" . '", "", "")')
+
     if a:0 == 3 && a:3 == "NewtabInsert"
         let ok = RSourceLines(lines, a:1, "NewtabInsert")
     else
@@ -1930,6 +1931,10 @@ function SendLineToR(godown)
 
     if &filetype == "rhelp" && RhelpIsInRCode(1) == 0
         return
+    endif
+
+    if &filetype == "r" && line =~ "^\s*#'"
+        let line = substitute(line, "^\s*#'", "", "")
     endif
 
     let ok = g:SendCmdToR(line)
