@@ -586,13 +586,13 @@ function GoDown()
     let i = line(".") + 1
     call cursor(i, 1)
     let curline = substitute(getline("."), '^\s*', "", "")
-    let curline = substitute(curline, "^#'", "", "")
+    let curline = substitute(curline, "^#\{1,2}'", "", "")
     let lastLine = line("$")
     while i < lastLine && (curline[0] == '#' || strlen(curline) == 0)
         let i = i + 1
         call cursor(i, 1)
         let curline = substitute(getline("."), '^\s*', "", "")
-        let curline = substitute(curline, "^#'", "", "")
+        let curline = substitute(curline, "^#\{1,2}'", "", "")
     endwhile
 endfunction
 
@@ -1745,7 +1745,7 @@ function SendSelectionToR(...)
         let lines[llen] = strpart(lines[llen], 0, j)
     endif
 
-    let lines = map(copy(lines), 'substitute(v:val, "^#' . "'" . '", "", "")')
+    let lines = map(copy(lines), 'substitute(v:val, "^#\{1,2}' . "'" . '", "", "")')
 
     if a:0 == 3 && a:3 == "NewtabInsert"
         let ok = RSourceLines(lines, a:1, "NewtabInsert")
@@ -1946,8 +1946,8 @@ function SendLineToR(godown)
         return
     endif
 
-    if &filetype == "r" && line =~ "^\s*#'"
-        let line = substitute(line, "^\s*#'", "", "")
+    if &filetype == "r" && line =~ "^\s*#\{1,2}'"
+        let line = substitute(line, "^\s*#\{1,2}'", "", "")
     endif
 
     let ok = g:SendCmdToR(line)
